@@ -5,7 +5,7 @@ import { authApi } from '@/api/client';
 import { useAuthStore } from '@/store/authStore';
 
 interface AuthFormProps {
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
 
 export default function AuthForm({ onSuccess }: AuthFormProps) {
@@ -20,109 +20,50 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
-    if (!email || !password) {
-      setError('Todos los campos son obligatorios');
-      return;
-    }
-
-    if (!isLogin && password !== confirmPassword) {
-      setError('Las contraseñas no coinciden');
-      return;
-    }
-
     setLoading(true);
+
     try {
       if (isLogin) {
         const res = await authApi.login(email, password);
         setTokens(res.data.access_token, res.data.refresh_token);
       } else {
-        const res = await authApi.register(email, password);
+        if (password !== confirmPassword) {
+          setError('Las contraseñas no coinciden');
+          setLoading(false);
+          return;
+        }
+        if (password.length < 8) {
+          setError('La contraseña debe tener al menos 8 caracteres');
+          setLoading(false);
+          return;
+        }
+        await authApi.register(email, password);
+        const res = await authApi.login(email, password);
         setTokens(res.data.access_token, res.data.refresh_token);
       }
-      onSuccess();
+      onSuccess?.();
     } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { detail?: string } } };
-      setError(axiosErr?.response?.data?.detail || 'Error al autenticar. Intenta de nuevo.');
+      const axiosError = err as { response?: { data?: { detail?: string } } };
+      setError(axiosError.response?.data?.detail || 'Error en la autenticación');
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleMode = () => {
-    setIsLogin(!isLogin);
-    setError('');
-    setConfirmPassword('');
-  };
-
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">
-            {isLogin ? '🔐 Iniciar sesión' : '📝 Registrarse'}
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            {isLogin
-              ? 'Bienvenido de vuelta a tu gestor de tareas'
-              : 'Crea una cuenta para empezar'}
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Email"
-            type="email"
-            placeholder="tu@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-
-          <Input
-            label="Contraseña"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-
-          {!isLogin && (
-            <Input
-              label="Confirmar contraseña"
-              type="password"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          )}
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-3 py-2">
-              {error}
-            </div>
-          )}
-
-          <Button
-            type="submit"
-            variant="primary"
-            size="lg"
-            className="w-full"
-            disabled={loading}
-          >
-            {loading ? 'Procesando...' : isLogin ? 'Entrar' : 'Crear cuenta'}
-          </Button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <button
-            type="button"
-            onClick={toggleMode}
-            className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
-          >
-            {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
-          </button>
-        </div>
-      </div>
-    </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" required />
+      <Input label="Contraseña" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 8 caracteres" required />
+      {!isLogin && (
+        <Input label="Confirmar contraseña" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repite la contraseña" required />
+      )}
+      {error && <p className="text-sm text-red-600">{error}</p>}
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading ? 'Cargando...' : isLogin ? 'Iniciar sesión' : 'Registrarse'}
+      </Button>
+      <button type="button" onClick={() => setIsLogin(!isLogin)} className="w-full text-sm text-blue-600 hover:underline">
+        {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
+      </button>
+    </form>
   );
 }

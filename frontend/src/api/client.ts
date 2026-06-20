@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 import axios from 'axios';
 import { useAuthStore } from '@/store/authStore';
 import type { Task, TaskListResponse, TaskCreate, TaskUpdate } from '@/types';
