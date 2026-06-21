@@ -1,15 +1,15 @@
 import { TaskItem } from '@/components/TaskItem';
-import type { Task } from '@/types';
+import type { Task, TaskUpdate } from '@/types';
 
 interface TaskListProps {
   tasks: Task[];
   loading: boolean;
   onToggle: (task: Task) => void;
   onDelete: (id: number) => void;
-  onEdit: (task: Task) => void;
+  onUpdate: (id: number, data: TaskUpdate) => Promise<unknown>;
 }
 
-export default function TaskList({ tasks, loading, onToggle, onDelete, onEdit }: TaskListProps) {
+export default function TaskList({ tasks, loading, onToggle, onDelete, onUpdate }: TaskListProps) {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
@@ -36,7 +36,7 @@ export default function TaskList({ tasks, loading, onToggle, onDelete, onEdit }:
           task={task}
           onToggle={onToggle}
           onDelete={onDelete}
-          onEdit={onEdit}
+          onUpdate={onUpdate}
         />
       ))}
     </div>

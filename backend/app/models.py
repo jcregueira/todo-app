@@ -26,8 +26,10 @@ Base = declarative_base()
 # ---------------------------------------------------------------------------
 
 class TaskStatus(str, enum.Enum):
-    PENDING = "pending"
-    COMPLETED = "completed"
+    TODO = "todo"
+    ONGOING = "ongoing"
+    DONE = "done"
+    BLOCKED = "blocked"
 
 
 class TaskPriority(str, enum.Enum):
@@ -68,7 +70,7 @@ class Task(Base):
     status = Column(
         SAEnum(TaskStatus, values_callable=lambda e: [m.value for m in e]),
         nullable=False,
-        default=TaskStatus.PENDING,
+        default=TaskStatus.TODO,
         index=True,
     )
     priority = Column(

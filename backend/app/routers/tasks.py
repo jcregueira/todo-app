@@ -84,10 +84,10 @@ def update_task(
 
     update_data = data.model_dump(exclude_unset=True)
 
-    # Auto-set completed_at when status changes to completed
-    if update_data.get("status") == TaskStatus.COMPLETED and task.status != TaskStatus.COMPLETED:
+    # Auto-set completed_at when status changes to done
+    if update_data.get("status") == TaskStatus.DONE and task.status != TaskStatus.DONE:
         update_data["completed_at"] = datetime.now(timezone.utc)
-    elif "status" in update_data and update_data["status"] != TaskStatus.COMPLETED:
+    elif "status" in update_data and update_data["status"] != TaskStatus.DONE:
         update_data["completed_at"] = None
 
     for key, value in update_data.items():
@@ -121,7 +121,7 @@ def list_overdue(
         db.query(Task)
         .filter(
             Task.user_id == current_user.id,
-            Task.status == TaskStatus.PENDING,
+            Task.status == TaskStatus.TODO,
             Task.due_date < now,
         )
         .order_by(Task.due_date.asc())

@@ -1,6 +1,8 @@
 export enum TaskStatus {
-  PENDING = 'pending',
-  COMPLETED = 'completed',
+  TODO = 'todo',
+  ONGOING = 'ongoing',
+  DONE = 'done',
+  BLOCKED = 'blocked',
 }
 
 export enum TaskPriority {

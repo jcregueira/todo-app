@@ -88,13 +88,9 @@ export default function DashboardPage() {
       <main className="max-w-3xl mx-auto px-4 py-6 space-y-5">
         <SearchBar onSearch={handleSearch} />
         <FilterBar activeFilter={filter} onFilterChange={setFilter} counts={counts} sortBy={sortBy} onSortChange={setSortBy} />
-        {formMode === 'edit' && editingTask ? (
-          <TaskForm mode="edit" task={editingTask} onSubmit={async (d) => { await handleUpdate(editingTask.id, d as TaskUpdate); handleCancelEdit(); }} onCancel={handleCancelEdit} />
-        ) : (
-          <TaskForm mode="create" onSubmit={async (d) => { await handleCreate(d as TaskCreate); fetchTasks(); }} />
-        )}
+        <TaskForm mode="create" onSubmit={async (d) => { await handleCreate(d as TaskCreate); fetchTasks(); }} />
         {error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">⚠️ {error}</div>}
-        <TaskList tasks={tasks} loading={loading} onToggle={handleToggle} onDelete={handleDelete} onEdit={handleEdit} />
+        <TaskList tasks={tasks} loading={loading} onToggle={handleToggle} onDelete={handleDelete} onUpdate={handleUpdate} />
       </main>
     </div>
   );
